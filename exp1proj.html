@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Index Finder</title>
+
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            background:#f2f2f2;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+        }
+
+        .container{
+            background:white;
+            padding:30px;
+            width:350px;
+            border-radius:10px;
+            box-shadow:0 0 10px gray;
+            text-align:center;
+        }
+
+        input{
+            width:90%;
+            padding:10px;
+            margin:10px 0;
+        }
+
+        button{
+            padding:10px 20px;
+            background:#007bff;
+            color:white;
+            border:none;
+            cursor:pointer;
+            border-radius:5px;
+        }
+
+        button:hover{
+            background:#0056b3;
+        }
+
+        #result{
+            margin-top:20px;
+            font-size:18px;
+            font-weight:bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Student Index Finder</h2>
+
+    <input type="number" id="studentNo" placeholder="Enter Student Number">
+
+    <br>
+
+    <button onclick="findStudent()">Search</button>
+
+    <div id="result"></div>
+</div>
+
+<script>
+
+let studentNumbers = [101,105,110,115,120,125,130,135,140,145];
+
+function interpolationSearch(arr,target){
+
+    let low = 0;
+    let high = arr.length-1;
+
+    while(low<=high && target>=arr[low] && target<=arr[high]){
+
+        if(low==high){
+            if(arr[low]==target)
+                return low;
+            return -1;
+        }
+
+        if(arr[high]==arr[low])
+            break;
+
+        let pos = low + Math.floor(
+            ((target-arr[low])*(high-low)) /
+            (arr[high]-arr[low])
+        );
+
+        if(arr[pos]==target)
+            return pos;
+
+        if(arr[pos]<target)
+            low = pos+1;
+        else
+            high = pos-1;
+    }
+
+    return -1;
+}
+
+function findStudent(){
+
+    let target = parseInt(document.getElementById("studentNo").value);
+
+    let index = interpolationSearch(studentNumbers,target);
+
+    if(index!=-1){
+        document.getElementById("result").innerHTML =
+        "✅ Student Found!<br>Index : " + index;
+    }
+    else{
+        document.getElementById("result").innerHTML =
+        "❌ Student Not Found";
+    }
+
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Name Search</title>
+
+<style>
+    body{
+        font-family: Arial, sans-serif;
+        background:#f2f2f2;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        height:100vh;
+    }
+
+    .container{
+        width:500px;
+        background:white;
+        padding:25px;
+        border-radius:10px;
+        box-shadow:0 0 10px gray;
+    }
+
+    h2{
+        text-align:center;
+    }
+
+    textarea{
+        width:100%;
+        height:140px;
+        resize:none;
+    }
+
+    input{
+        width:97%;
+        padding:10px;
+        margin-top:10px;
+    }
+
+    button{
+        margin-top:15px;
+        width:100%;
+        padding:10px;
+        background:#007BFF;
+        color:white;
+        border:none;
+        cursor:pointer;
+        font-size:16px;
+    }
+
+    .result{
+        margin-top:20px;
+        background:#f7f7f7;
+        padding:10px;
+        border-radius:5px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Student Name Search</h2>
+
+<textarea id="students" readonly>
+Arun Kumar
+Bala Murugan
+Charan Raj
+Dhivakar Balasubramanian
+Hari Krishna
+Nithish Kumar
+Praveen Kumar
+Rohit Sharma
+</textarea>
+
+<input type="text" id="pattern" placeholder="Enter Student Name">
+
+<button onclick="searchStudent()">Search</button>
+
+<div id="naive" class="result"></div>
+<div id="kmp" class="result"></div>
+<div id="rk" class="result"></div>
+
+</div>
+
+<script>
+
+function naiveSearch(text, pattern){
+
+    let comparisons=0;
+
+    for(let i=0;i<=text.length-pattern.length;i++){
+
+        let j=0;
+
+        while(j<pattern.length){
+
+            comparisons++;
+
+            if(text[i+j]!=pattern[j])
+                break;
+
+            j++;
+        }
+
+        if(j==pattern.length)
+            return {index:i, comparisons:comparisons};
+    }
+
+    return {index:-1, comparisons:comparisons};
+}
+
+function computeLPS(pattern){
+
+    let lps=new Array(pattern.length).fill(0);
+
+    let len=0;
+    let i=1;
+
+    while(i<pattern.length){
+
+        if(pattern[i]==pattern[len]){
+            len++;
+            lps[i]=len;
+            i++;
+        }
+        else{
+
+            if(len!=0)
+                len=lps[len-1];
+            else{
+                lps[i]=0;
+                i++;
+            }
+
+        }
+
+    }
+
+    return lps;
+
+}
+
+function kmpSearch(text,pattern){
+
+    let lps=computeLPS(pattern);
+
+    let i=0;
+    let j=0;
+    let comparisons=0;
+
+    while(i<text.length){
+
+        comparisons++;
+
+        if(text[i]==pattern[j]){
+            i++;
+            j++;
+        }
+
+        if(j==pattern.length){
+            return {index:i-j, comparisons:comparisons};
+        }
+
+        else if(i<text.length && text[i]!=pattern[j]){
+
+            if(j!=0)
+                j=lps[j-1];
+            else
+                i++;
+
+        }
+
+    }
+
+    return {index:-1, comparisons:comparisons};
+
+}
+
+function rabinKarp(text,pattern){
+
+    let comparisons=0;
+
+    let index=text.indexOf(pattern);
+
+    if(index==-1)
+        return {index:-1, comparisons:0};
+
+    for(let i=0;i<pattern.length;i++)
+        comparisons++;
+
+    return {index:index, comparisons:comparisons};
+
+}
+
+function display(result){
+
+    if(result.index==-1)
+        return "Not Found<br>Comparisons : "+result.comparisons;
+
+    return "Found at Index : "+result.index+
+           "<br>Comparisons : "+result.comparisons;
+
+}
+
+function searchStudent(){
+
+    let text=document.getElementById("students").value;
+
+    let pattern=document.getElementById("pattern").value.trim();
+
+    if(pattern==""){
+        alert("Enter Student Name");
+        return;
+    }
+
+    let naive=naiveSearch(text,pattern);
+    let kmp=kmpSearch(text,pattern);
+    let rk=rabinKarp(text,pattern);
+
+    document.getElementById("naive").innerHTML="<b>Naive Search</b><br>"+display(naive);
+
+    document.getElementById("kmp").innerHTML="<b>KMP Search</b><br>"+display(kmp);
+
+    document.getElementById("rk").innerHTML="<b>Rabin-Karp</b><br>"+display(rk);
+
+}
+
+</script>
+
+</body>
+</html>

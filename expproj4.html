@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Campus Route Finder</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#f2f2f2;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.container{
+    width:700px;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px gray;
+}
+
+h2{
+    text-align:center;
+}
+
+select,button{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    font-size:16px;
+}
+
+button{
+    background:#007BFF;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0056b3;
+}
+
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse:collapse;
+}
+
+table,th,td{
+    border:1px solid #ccc;
+}
+
+th,td{
+    padding:10px;
+    text-align:center;
+}
+
+th{
+    background:#007BFF;
+    color:white;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h2>Campus Route Finder</h2>
+
+<select id="source">
+<option value="0">Admin Block</option>
+<option value="1">Library</option>
+<option value="2">CSE Block</option>
+<option value="3">AIML Block</option>
+<option value="4">Mechanical Block</option>
+<option value="5">Hostel</option>
+</select>
+
+<button onclick="findRoutes()">Find Shortest Paths</button>
+
+<table id="result">
+<tr>
+<th>Destination</th>
+<th>Distance</th>
+<th>Path</th>
+</tr>
+</table>
+
+</div>
+
+<script>
+
+const names=[
+"Admin Block",
+"Library",
+"CSE Block",
+"AIML Block",
+"Mechanical Block",
+"Hostel"
+];
+
+const graph={
+0:[[1,4],[2,1]],
+1:[[3,1]],
+2:[[1,2],[3,5]],
+3:[[4,3]],
+4:[[5,2]],
+5:[]
+};
+
+function dijkstra(source){
+
+    let dist=new Array(names.length).fill(Infinity);
+    let prev=new Array(names.length).fill(null);
+    let visited=new Array(names.length).fill(false);
+
+    dist[source]=0;
+
+    while(true){
+
+        let u=-1;
+
+        for(let i=0;i<names.length;i++){
+
+            if(!visited[i] && (u==-1 || dist[i]<dist[u]))
+                u=i;
+
+        }
+
+        if(u==-1 || dist[u]==Infinity)
+            break;
+
+        visited[u]=true;
+
+        for(let edge of graph[u]){
+
+            let v=edge[0];
+            let w=edge[1];
+
+            if(dist[u]+w<dist[v]){
+
+                dist[v]=dist[u]+w;
+                prev[v]=u;
+
+            }
+
+        }
+
+    }
+
+    return {dist,prev};
+
+}
+
+function path(prev,target){
+
+    let p=[];
+
+    while(target!=null){
+
+        p.push(names[target]);
+        target=prev[target];
+
+    }
+
+    return p.reverse().join(" → ");
+
+}
+
+function findRoutes(){
+
+    let source=parseInt(document.getElementById("source").value);
+
+    let result=dijkstra(source);
+
+    let table=document.getElementById("result");
+
+    table.innerHTML=
+    "<tr><th>Destination</th><th>Distance</th><th>Path</th></tr>";
+
+    for(let i=0;i<names.length;i++){
+
+        let row=table.insertRow();
+
+        row.insertCell(0).innerHTML=names[i];
+        row.insertCell(1).innerHTML=
+        result.dist[i]==Infinity?"INF":result.dist[i];
+        row.insertCell(2).innerHTML=
+        result.dist[i]==Infinity?"No Path":path(result.prev,i);
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

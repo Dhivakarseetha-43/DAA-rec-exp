@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Campus Network Planner</title>
+
+    <style>
+        body{
+            font-family: Arial;
+            background:#f2f2f2;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+        }
+
+        .container{
+            width:700px;
+            background:white;
+            padding:20px;
+            border-radius:10px;
+            box-shadow:0 0 10px gray;
+        }
+
+        h2{
+            text-align:center;
+        }
+
+        button{
+            width:100%;
+            padding:12px;
+            background:#007BFF;
+            color:white;
+            border:none;
+            font-size:16px;
+            cursor:pointer;
+            margin-top:15px;
+        }
+
+        button:hover{
+            background:#0056b3;
+        }
+
+        .result{
+            margin-top:20px;
+            padding:10px;
+            background:#f8f8f8;
+            border-radius:5px;
+        }
+
+        pre{
+            white-space:pre-wrap;
+            font-size:15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Campus Network Planner</h2>
+
+<b>Buildings</b>
+
+<pre>
+0 - Admin Block
+1 - Library
+2 - CSE Block
+3 - AIML Block
+4 - Mechanical Block
+5 - Hostel
+6 - Cafeteria
+</pre>
+
+<button onclick="generateMST()">Generate MST</button>
+
+<div class="result">
+<h3>Kruskal's Algorithm</h3>
+<pre id="kruskal"></pre>
+</div>
+
+<div class="result">
+<h3>Prim's Algorithm</h3>
+<pre id="prim"></pre>
+</div>
+
+</div>
+
+<script>
+
+const names=[
+"Admin Block",
+"Library",
+"CSE Block",
+"AIML Block",
+"Mechanical Block",
+"Hostel",
+"Cafeteria"
+];
+
+const n=7;
+
+const edges=[
+[7,0,1],
+[5,0,3],
+[8,1,2],
+[9,1,3],
+[7,1,4],
+[5,2,4],
+[15,3,4],
+[6,3,5],
+[8,4,5],
+[9,4,6],
+[11,5,6]
+];
+
+class UnionFind{
+
+    constructor(n){
+        this.parent=[];
+        this.rank=[];
+        for(let i=0;i<n;i++){
+            this.parent[i]=i;
+            this.rank[i]=0;
+        }
+    }
+
+    find(x){
+        if(this.parent[x]!=x)
+            this.parent[x]=this.find(this.parent[x]);
+        return this.parent[x];
+    }
+
+    union(x,y){
+
+        let rx=this.find(x);
+        let ry=this.find(y);
+
+        if(rx==ry)
+            return false;
+
+        if(this.rank[rx]<this.rank[ry]){
+            let t=rx;
+            rx=ry;
+            ry=t;
+        }
+
+        this.parent[ry]=rx;
+
+        if(this.rank[rx]==this.rank[ry])
+            this.rank[rx]++;
+
+        return true;
+    }
+
+}
+
+function kruskal(){
+
+    let uf=new UnionFind(n);
+
+    let sorted=[...edges].sort((a,b)=>a[0]-b[0]);
+
+    let cost=0;
+    let output="";
+
+    for(let e of sorted){
+
+        let w=e[0];
+        let u=e[1];
+        let v=e[2];
+
+        if(uf.union(u,v)){
+            output+=`${names[u]}  →  ${names[v]}   (${w})\n`;
+            cost+=w;
+        }
+
+    }
+
+    output+="\nTotal Cost : "+cost;
+
+    return output;
+
+}
+
+function prim(){
+
+    let visited=new Array(n).fill(false);
+
+    visited[0]=true;
+
+    let count=0;
+    let cost=0;
+    let output="";
+
+    while(count<n-1){
+
+        let min=9999;
+        let x=-1;
+        let y=-1;
+
+        for(let i=0;i<n;i++){
+
+            if(visited[i]){
+
+                for(let e of edges){
+
+                    let w=e[0];
+                    let u=e[1];
+                    let v=e[2];
+
+                    if(u==i && !visited[v] && w<min){
+
+                        min=w;
+                        x=u;
+                        y=v;
+
+                    }
+
+                    if(v==i && !visited[u] && w<min){
+
+                        min=w;
+                        x=v;
+                        y=u;
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        visited[y]=true;
+
+        output+=`${names[x]}  →  ${names[y]}   (${min})\n`;
+
+        cost+=min;
+
+        count++;
+
+    }
+
+    output+="\nTotal Cost : "+cost;
+
+    return output;
+
+}
+
+function generateMST(){
+
+    document.getElementById("kruskal").innerText=kruskal();
+
+    document.getElementById("prim").innerText=prim();
+
+}
+
+</script>
+
+</body>
+</html>
